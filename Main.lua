@@ -1,10 +1,19 @@
 -- Initialize the core UI library
-local VeenzeLib = loadstring(game:HttpGet("[https://raw.githubusercontent.com/crazy-invader135/VeenzeGui/main/Lib.lua](https://raw.githubusercontent.com/crazy-invader135/VeenzeGui/main/Lib.lua)"))()
+local VeenzeLib
+local success, err = pcall(function()
+    VeenzeLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/crazy-invader135/VeenzeGui/main/Lib.lua"))()
+end)
+
+if not success or not VeenzeLib then
+    warn("Failed to load UI library: " .. tostring(err))
+    return
+end
+
 local Window = VeenzeLib:CreateWindow("Brainrot killer")
 
 -- Configuration Table mapping Place IDs to standalone source loadstrings
 local SupportedGames = {
-    [136919941417380]  = "[https://raw.githubusercontent.com/crazy-invader135/VeenzeGui/refs/heads/main/brainrotkiller/BikeObbyForBrainrots.lua](https://raw.githubusercontent.com/crazy-invader135/VeenzeGui/refs/heads/main/brainrotkiller/BikeObbyForBrainrots.lua)",
+    [136919941417380] = "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/136919941417380.lua",
 }
 
 local CurrentPlaceId = game.PlaceId
