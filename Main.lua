@@ -10,23 +10,37 @@ if not success or not VeenzeLib then
 end
 
 local Window = VeenzeLib:CreateWindow("Brainrot killer")
+_G.VeenzeLib = VeenzeLib
+_G.WindowContext = Window
 
 -- Configuration Table mapping Place IDs to standalone source loadstrings
 local SupportedGames = {
     [136919941417380] = "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/136919941417380.lua",
+    [103311003648859] = "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/103311003648859.lua",
+}
+
+local SharedScripts = {
+    "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/103311003648859.lua",
 }
 
 local CurrentPlaceId = game.PlaceId
 
+for _, scriptUrl in ipairs(SharedScripts) do
+    local ok, scriptErr = pcall(function()
+        loadstring(game:HttpGet(scriptUrl))()
+    end)
+
+    if not ok then
+        warn("Failed to load shared script: " .. tostring(scriptErr))
+    end
+end
+
 if SupportedGames[CurrentPlaceId] then
-    -- 1. Pass the initialized Window context to a global variable
-    _G.WindowContext = Window
-    
-    -- 2. Fetch and execute the game-specific standalone script
+    -- Fetch and execute the game-specific standalone script
     local success, err = pcall(function()
         loadstring(game:HttpGet(SupportedGames[CurrentPlaceId]))()
     end)
-    
+
     if not success then
         warn("Failed to load game script: " .. tostring(err))
     end
