@@ -164,7 +164,7 @@ MainTab:CreateToggle("Auto Upgrade", false, function(Value)
     if upgradeLoopActive then
         task.spawn(function()
             while upgradeLoopActive do
-                local randomNum = math.random(1, 10)
+                local randomNum = math.random(1, 30)
                 UpgradeBrainrotEvent:FireServer(randomNum)
                 task.wait(0.1)
             end
