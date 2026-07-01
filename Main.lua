@@ -54,7 +54,9 @@ end
 
 -- Establish global interface metadata elements
 Window:CreateSupportedGamesTab({
-    {name = "Bike obby for brainrots", status = "green", placeId = 136919941417380},
+    {name = "Bike obby for brainrots", status = "yellow", placeId = 136919941417380},
+    {name = "Lucky block game", status = "green", placeId = 103311003648859},
+
 })
 
 Window:SetCredits("Credits:\n\nUI lib made by: Veenze\n\nScript compiler: Developer")
