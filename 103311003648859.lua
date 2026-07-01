@@ -1,33 +1,45 @@
-if _G.LuckTestUIState and _G.LuckTestUIState.Window then
-    return _G.LuckTestUIState.Window
-end
+local function getOrCreateWindow()
+    if _G.LuckTestUIState and _G.LuckTestUIState.Window then
+        return _G.LuckTestUIState.Window
+    end
 
-local Library
-local Window
+    if _G.WindowContext and type(_G.WindowContext.CreateTab) == "function" then
+        _G.LuckTestUIState = _G.LuckTestUIState or {}
+        _G.LuckTestUIState.Window = _G.WindowContext
+        return _G.WindowContext
+    end
 
-if _G.WindowContext and type(_G.WindowContext.CreateTab) == "function" then
-    Window = _G.WindowContext
-else
     local success, lib = pcall(function()
         return loadstring(game:HttpGet("https://raw.githubusercontent.com/crazy-invader135/VeenzeGui/refs/heads/main/Lib.lua"))()
     end)
 
     if not success or not lib then
         warn("Failed to load UI library for Luck Test UI: " .. tostring(lib))
-        return
+        return nil
     end
 
-    Library = lib
-    _G.VeenzeLib = Library
-    Window = Library:CreateWindow("Luck Test UI")
-    _G.WindowContext = Window
+    _G.VeenzeLib = lib
+    local window = lib:CreateWindow("Luck Test UI")
+    _G.WindowContext = window
+    _G.LuckTestUIState = _G.LuckTestUIState or {}
+    _G.LuckTestUIState.Window = window
+    return window
+end
+
+local Window = getOrCreateWindow()
+if not Window then
+    return
 end
 
 _G.LuckTestUIState = _G.LuckTestUIState or {}
-_G.LuckTestUIState.Window = Window
+if _G.LuckTestUIState.Initialized then
+    return
+end
 
-local MainTab = Window:CreateTab("Main")
+_G.LuckTestUIState.Window = Window
+local MainTab = _G.LuckTestUIState.MainTab or Window:CreateTab("Main")
 _G.LuckTestUIState.MainTab = MainTab
+_G.LuckTestUIState.Initialized = true
 
 -- Configuration and State
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -35,10 +47,18 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local DoorEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DoorEvent")
-local UpgradeBrainrotEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("UpgradeBrainrotEvent")
-local EnergyEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("EnergyEvent")
-local DamageEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DamageEvent")
+local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
+local DoorEvent = remotesFolder and remotesFolder:FindFirstChild("DoorEvent")
+local UpgradeBrainrotEvent = remotesFolder and remotesFolder:FindFirstChild("UpgradeBrainrotEvent")
+local EnergyEvent = remotesFolder and remotesFolder:FindFirstChild("EnergyEvent")
+local DamageEvent = remotesFolder and remotesFolder:FindFirstChild("DamageEvent")
+
+if not DoorEvent or not UpgradeBrainrotEvent or not EnergyEvent or not DamageEvent then
+    warn("Luck Test UI: required remotes were not found, so auto features were disabled.")
+    MainTab:CreateButton("Required remotes missing", function()
+    end)
+    return
+end
 
 local farmLoopActive = false
 local upgradeLoopActive = false
@@ -203,18 +223,20 @@ MainTab:CreateToggle("God Mode (Block Damage)", false, function(Value)
 end)
 
 -- Metatable hook
-local rawmetatable = getrawmetatable(game)
-local oldNamecall = rawmetatable.__namecall
-setreadonly(rawmetatable, false)
+local ok, rawmetatable = pcall(getrawmetatable, game)
+if ok and rawmetatable then
+    local oldNamecall = rawmetatable.__namecall
+    setreadonly(rawmetatable, false)
 
-rawmetatable.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    
-    if godModeActive and self == DamageEvent and (method == "FireServer" or method == "fireServer") then
-        return nil
-    end
-    
-    return oldNamecall(self, ...)
-end)
+    rawmetatable.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
 
-setreadonly(rawmetatable, true)
+        if godModeActive and self == DamageEvent and (method == "FireServer" or method == "fireServer") then
+            return nil
+        end
+
+        return oldNamecall(self, ...)
+    end)
+
+    setreadonly(rawmetatable, true)
+end
