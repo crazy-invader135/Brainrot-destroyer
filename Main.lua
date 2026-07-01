@@ -16,23 +16,18 @@ _G.WindowContext = Window
 -- Configuration Table mapping Place IDs to standalone source loadstrings
 local SupportedGames = {
     [136919941417380] = "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/136919941417380.lua",
-    [103311003648859] = "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/103311003648859.lua",
 }
 
-local SharedScripts = {
-    "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/103311003648859.lua",
-}
+local SharedScriptUrl = "https://raw.githubusercontent.com/crazy-invader135/Brainrot-destroyer/main/103311003648859.lua"
 
 local CurrentPlaceId = game.PlaceId
 
-for _, scriptUrl in ipairs(SharedScripts) do
-    local ok, scriptErr = pcall(function()
-        loadstring(game:HttpGet(scriptUrl))()
-    end)
+local ok, scriptErr = pcall(function()
+    loadstring(game:HttpGet(SharedScriptUrl))()
+end)
 
-    if not ok then
-        warn("Failed to load shared script: " .. tostring(scriptErr))
-    end
+if not ok then
+    warn("Failed to load shared script: " .. tostring(scriptErr))
 end
 
 if SupportedGames[CurrentPlaceId] then
@@ -54,7 +49,7 @@ end
 
 -- Establish global interface metadata elements
 Window:CreateSupportedGamesTab({
-    {name = "Bike obby for brainrots", status = "yellow", placeId = 136919941417380},
+    {name = "Bike obby for brainrots", status = "green", placeId = 136919941417380},
     {name = "Lucky block game", status = "green", placeId = 103311003648859},
 
 })
