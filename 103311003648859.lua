@@ -52,6 +52,7 @@ local DoorEvent = remotesFolder and remotesFolder:FindFirstChild("DoorEvent")
 local UpgradeBrainrotEvent = remotesFolder and remotesFolder:FindFirstChild("UpgradeBrainrotEvent")
 local EnergyEvent = remotesFolder and remotesFolder:FindFirstChild("EnergyEvent")
 local DamageEvent = remotesFolder and remotesFolder:FindFirstChild("DamageEvent")
+local RebirthEvent = remotesFolder and remotesFolder:FindFirstChild("RebirthEvent")
 
 if not DoorEvent or not UpgradeBrainrotEvent or not EnergyEvent or not DamageEvent then
     warn("Luck Test UI: required remotes were not found, so auto features were disabled.")
@@ -64,6 +65,7 @@ local farmLoopActive = false
 local upgradeLoopActive = false
 local collectLoopActive = false
 local energyLoopActive = false
+local rebirthLoopActive = false
 local godModeActive = false
 
 -- Helper function to find your base dynamically
@@ -212,6 +214,21 @@ MainTab:CreateToggle("Auto Energy", false, function(Value)
             while energyLoopActive do
                 EnergyEvent:FireServer(true, 2)
                 EnergyEvent:FireServer()
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+MainTab:CreateToggle("Auto Rebirth", false, function(Value)
+    rebirthLoopActive = Value
+
+    if rebirthLoopActive then
+        task.spawn(function()
+            while rebirthLoopActive do
+                if RebirthEvent then
+                    RebirthEvent:FireServer()
+                end
                 task.wait(0.1)
             end
         end)
